@@ -1,0 +1,63 @@
+version: '3'
+
+services:
+  postgres:
+    image: 'postgres:10.4-alpine'
+    environment:
+      POSTGRES_USER: 'otltestuser'
+      POSTGRES_PASSWORD: 'otltestpassword'
+    # ports:
+    #   - '5432:5432'
+    volumes:
+      - 'postgres:/var/lib/postgresql/data'
+    env_file:
+      - '.env'
+  
+  redis:
+    image: 'redis:4.0-alpine'
+    command: redis-server
+    # ports:
+    #  - '6379:6379'
+    volumes:
+      - 'redis:/data'
+    env_file:
+      - '.env'
+
+  web:
+    depends_on:
+      - 'postgres'
+      - 'redis'
+    build: .
+    ports:
+      - '3000:3000'
+    env_file:
+      - '.env'
+    volumes:
+      - '.:/app'
+
+  # sidekiq:
+  #   depends_on:
+  #     - 'postgres'
+  #     - 'redis'
+  #   build: .
+  #   command: sidekiq -C config/sidekiq.yml.erb
+  #   volumes:
+  #     - '.:/app'
+  #   env_file:
+  #     - '.env'
+
+  # cable:
+  #   depends_on:
+  #     - 'redis'
+  #   build: .
+  #   command: puma -p 28080 cable/config.ru
+  #   ports:
+  #     - '28080:28080'
+  #   volumes:
+  #     - '.:/app'
+  #   env_file:
+  #     - '.env'
+
+volumes:
+  redis: {}
+  postgres: {}
